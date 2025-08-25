@@ -155,13 +155,10 @@ def validar_colunas(df):
     return df
 
 
-
-
 def processar_arquivos():
     """
     Função refatorada para processar arquivos e gerar relatórios em PDF.
-    Mantém o formato original do PDF, mas com suporte a múltiplas modalidades
-    e extensão para 10 anos.
+    Layout corrigido com base na foto de referência.
     """
     
     # ============================================================================
@@ -271,92 +268,184 @@ def processar_arquivos():
     except:
         locale.setlocale(locale.LC_TIME, 'Portuguese')
 
-    # Configuração de estilo das tabelas
-    style = TableStyle([
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-    ])
+    # Estilo para informações gerais (cliente/contrato)
+    StyleInformacoes = TableStyle([
+            # Estilo geral
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 5),  # Tamanho da fonte geral
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Alinhamento à esquerda
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Centralização vertical
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 1),  # Espaçamento interno inferior
+            ('TOPPADDING', (0, 0), (-1, -1), 1),  # Espaçamento interno superior
 
-    StyleTituloMudado = TableStyle([
+            # Estilo para a linha de cabeçalho
+            ('SPAN', (0, 0), (-1, 0)),  # Mescla as colunas na primeira linha
+            ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Texto branco
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alinhamento centralizado
+            ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),  # Linha acima da primeira linha
+            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),  # Linha abaixo da primeira linha
+            ('FONTSIZE', (0, 0), (-1, 0), 6),  # Aumenta o tamanho da fonte na primeira linha
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Deixa a primeira linha em negrito
+
+
+            # Estilo para os títulos das linhas
+            ('TEXTCOLOR', (0, 1), (0, -1), colors.black),  # Texto preto                
+            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),  # Texto em negrito
+
+            # Fundo das células de conteúdo
+            ('BACKGROUND', (1, 1), (1, -1), colors.white),  # Fundo branco
+            ('INNERGRID', (0, 1), (-1, -1), 0, colors.white),  # Sem grade interna
+            ('BOX', (0, 1), (-1, -1), 0, colors.white),  # Sem borda externa
+        ])
+
+    # Estilo para a tabela de consumo unificado
+
+    # Determinar se o resultado >= 100 para aplicar cor vermelha
+    
+
+    StyleConsumoUnificado = TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 0), (-1, -1), 5),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
         ('TOPPADDING', (0, 0), (-1, -1), 1),
+        # Cabeçalho
         ('SPAN', (0, 0), (-1, 0)),
-        ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
+        ('BACKGROUND', (0, 0), (-1, 0), (192/255, 0/255, 10/255)),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
         ('FONTSIZE', (0, 0), (-1, 0), 6),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 1), (0, -1), colors.black),
-        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-        ('BACKGROUND', (1, 1), (1, -1), colors.white),
-        ('INNERGRID', (0, 1), (-1, -1), 0, colors.white),
-        ('BOX', (0, 1), (-1, -1), 0, colors.white),
+        # Segunda linha
+        ('BACKGROUND', (0, 1), (-1, 1), (192/255, 0/255, 10/255)),
+        ('TEXTCOLOR', (0, 1), (-1, 1), colors.white),
+        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
+        # Terceira linha
+        ('BACKGROUND', (0, 2), (-1, 2), (230/255, 230/255, 230/255)),
+        ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+        ('ALIGN', (0, 2), (-1, 2), 'LEFT'),
+        # Primeira coluna da terceira linha pra baixo
+        ('BACKGROUND', (0, 2), (0, -1), (230/255, 230/255, 230/255)),
+        ('TEXTCOLOR', (0, 2), (0, -1), colors.black),
+        # Títulos das linhas restantes
+        ('TEXTCOLOR', (0, 3), (0, -1), colors.black),
+        ('FONTNAME', (0, 3), (0, -1), 'Helvetica-Bold'),
+        # Fundo restante
+        ('BACKGROUND', (1, 3), (-1, -1), colors.white),
+        # Coluna destacada em negrito
+        ('FONTNAME', (1, 2), (1, -1), 'Helvetica-Bold'),
+        # Grade
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
     ])
 
     StyleColigados = TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 5),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
         ('SPAN', (0, 0), (-1, 0)),
         ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
-        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
-        ('FONTSIZE', (0, 0), (-1, 0), 6),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 2), (0, -1), colors.black),
-        ('FONTNAME', (0, 2), (-1, -1), 'Helvetica'),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
     ])
 
     StyleBaseHistorica = TableStyle([
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 5),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        ('SPAN', (0, 0), (-1, 0)),
-        ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
-        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
-        ('FONTSIZE', (0, 0), (-1, 0), 6),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (0, 2), (0, -1), colors.black),
-        ('FONTNAME', (0, 2), (-1, -1), 'Helvetica'),
-        ('BACKGROUND', (1, 1), (1, -1), colors.white),
-        ('INNERGRID', (0, 1), (-1, -1), 0, colors.white),
-        ('BOX', (0, 1), (-1, -1), 0, colors.white),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-    ])
+            # Estilo geral
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),  # Fonte padrão
+            ('FONTSIZE', (0, 0), (-1, -1), 5),  # Tamanho da fonte geral
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Alinhamento à esquerda
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Centralização vertical
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 1),  # Espaçamento interno inferior
+            ('TOPPADDING', (0, 0), (-1, -1), 1),  # Espaçamento interno superior
 
-    def calcular_altura_tabela(num_linhas):
-        altura_linha = 15
-        return num_linhas * altura_linha
+            # Estilo para a linha de cabeçalho
+            ('SPAN', (0, 0), (-1, 0)),  # Mescla as colunas na primeira linha
+            ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),  # Fundo azul-escuro
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Texto branco
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alinhamento centralizado
+            ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),  # Linha acima da primeira linha
+            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),  # Linha abaixo da primeira linha
+            ('FONTSIZE', (0, 0), (-1, 0), 6),  # Aumenta o tamanho da fonte na primeira linha
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Negrito na primeira linha
+
+            # Estilo para a segunda linha (também em negrito)
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),  # Negrito na segunda linha
+
+            # Estilo para os títulos das linhas restantes
+            ('TEXTCOLOR', (0, 2), (0, -1), colors.black),  # Texto preto (da terceira linha em diante)
+            ('FONTNAME', (0, 2), (-1, -1), 'Helvetica'),  # Fonte normal da terceira linha em diante
+
+            # Fundo das células de conteúdo
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Grade interna
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Borda externa
+
+            ])
+    styleConsumo = TableStyle([
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 4),  # Tamanho da fonte para todas as células
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                        ('TOPPADDING', (0, 0), (-1, -1), 1),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                        
+                        # Mescla as colunas 1 e 2 na primeira linha
+                        ('SPAN', (0, 0), (1, 0)),  
+
+                        # Mescla as colunas 3, 4 e 5 na primeira linha
+                        ('SPAN', (2, 0), (4, 0)),
+
+                        # Mescla a quarta, quinta e sexta colunas a partir da terceira linha
+                        ('SPAN', (3, 2), (3, -1)),  
+                        ('SPAN', (4, 2), (4, -1)),  
+                        ('SPAN', (5, 2), (5, -1)),  
+                        
+                        # Aumenta o tamanho da fonte das colunas mescladas a partir da terceira linha
+                        ('FONTSIZE', (3, 2), (3, -1), 9),  
+                        ('FONTSIZE', (4, 2), (4, -1), 9),  
+                        ('FONTSIZE', (5, 2), (5, -1), 9),  
+
+                        # Formatação da primeira linha (cabeçalho)
+                        ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),  # Fundo azul-escuro
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Texto branco
+                        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alinhamento centralizado
+                        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),  # Linha acima da primeira linha
+                        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),  # Linha abaixo da primeira linha
+                        ('FONTSIZE', (0, 0), (-1, 0), 6),  # Aumenta o tamanho da fonte na primeira linha
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Negrito na primeira linha
+
+                        # Formatação da segunda linha
+                        ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),  # Fundo cinza claro
+                        ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),  # Texto em negrito na segunda linha
+
+                        # Fundo azul claro para as colunas 3 a 5 na primeira linha
+                        ('BACKGROUND', (2, 0), (4, 0), (132/255, 150/255, 175/255)),  # Fundo azul claro para as colunas 3 a 5
+
+                        # Divisões da tabela com cinza claro
+                        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Grade interna
+                        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Borda externa
+
+                        ('ALIGN', (5, 0), (5, 0), 'CENTER'),  # Alinhamento centralizado da coluna 6
+                        ('VALIGN', (5, 0), (5, 0), 'MIDDLE'),  # Alinhamento vertical no meio
+                        ('FONTSIZE', (5, 0), (5, 0), 6),  # Tamanho da fonte ajustado
+                        ('COLWIDTH', (5, 0), (5, -1), 50),
+                        ('TEXTCOLOR', (4, 3), (5, -1), colors.green),  
+                        ('FONTNAME', (4, 3), (5, -1), 'Helvetica-Bold'),
+                    ])
 
     messagebox.showinfo("Salvar Arquivos", "Iniciar o processo de salvar!")
 
@@ -371,7 +460,7 @@ def processar_arquivos():
     def validar_formatar_consumo(valor):
         if pd.notna(valor):
             return formatar_moeda(valor)
-        return ""
+        return "R$ 0,00"
 
     def calcular_ano_referencia(data_inicio):
         data_inicio = datetime.strptime(data_inicio, "%d/%m/%Y")
@@ -410,7 +499,6 @@ def processar_arquivos():
         # ============================================================================
         # SEÇÃO 7: BUSCAR TODAS AS MODALIDADES DO CLIENTE
         # ============================================================================
-        # Buscar TODAS as modalidades do cliente no Base original (não só no concatenado)
         todas_modalidades_cliente = Base[
             (Base['SAP PRINCIPAL'] == sap_principal_filtro) & 
             (Base['ATIVO OU INATIVO'] == 'ATIVO') & 
@@ -432,7 +520,6 @@ def processar_arquivos():
         # ============================================================================
         # SEÇÃO 8: PREPARAÇÃO DE DADOS CONSOLIDADOS
         # ============================================================================
-        # Filtragem de lentes para o cliente
         FiltrandoLentes = BaseConsumo[(BaseConsumo['CÓDIGO SAP'] == sap_principal_filtro) & 
                                      (BaseConsumo['Nº INTERNO'] == Ninterno) & 
                                      (BaseConsumo['ATIVO OU INATIVO'] == "ATIVO")]
@@ -451,7 +538,6 @@ def processar_arquivos():
         # ============================================================================
         # SEÇÃO 9: CALCULAR DATA DE REFERÊNCIA (CONTRATO MAIS ANTIGO)
         # ============================================================================
-        # Encontrar o contrato mais antigo entre todas as modalidades
         data_inicio_mais_antiga = None
         contrato_referencia = None
         
@@ -462,7 +548,6 @@ def processar_arquivos():
                     data_inicio_mais_antiga = data_inicio_contrato
                     contrato_referencia = contrato
 
-        # Usar o contrato mais antigo como referência para datas
         if contrato_referencia is not None:
             dados_referencia = contrato_referencia
         else:
@@ -471,7 +556,6 @@ def processar_arquivos():
         # ============================================================================
         # SEÇÃO 10: PROCESSAMENTO DE DATAS E APURAÇÃO
         # ============================================================================
-        # Processamento das datas de apuração baseado no contrato mais antigo
         DataDaApuração = data_base_excel + timedelta(dados_referencia.get('INICIO DA APURAÇÃO'))
         DataFimApuração = DataDaApuração + relativedelta(months=int(dados_referencia.get('PRAZO APURACAO', 0)))
         
@@ -479,7 +563,6 @@ def processar_arquivos():
         anodeApuracaosemfromatar = DataDaApuração.year
         
         DataDaApuraçãoFormatada = f"{mes_extenso} de {anodeApuracaosemfromatar}"
-        DataDaApuraçãoFiltro = DataDaApuração.strftime('%Y-%m')
         DataFimApuraçãoFormatada = DataFimApuração.strftime('%d/%m/%Y')
 
         dif_anos = DataFimApuração.year - data_atual.year
@@ -487,7 +570,6 @@ def processar_arquivos():
         total_meses = (dif_anos * 12) + dif_meses - 1
 
         DataInicioApuraçãoFormatada = DataDaApuração.strftime('%d/%m/%Y')
-        DataFimApuraçãoFormatada = DataFimApuração.strftime('%d/%m/%Y')
 
         # Processamento das datas de vigência
         try:
@@ -511,46 +593,39 @@ def processar_arquivos():
         DataFimFormatada = DataFim.strftime('%d/%m/%Y')
         Vigencia = f"{DataInicioFormatada} - {DataFimFormatada}"
 
-        InicioApuração = DataDaApuração
         AnodaApuração = calcular_ano_referencia(DataInicioFormatada)
 
         # ============================================================================
-        # SEÇÃO 11: CONSUMO UNIFICADO (SOMAR TODAS AS MODALIDADES - 10 ANOS)
+        # SEÇÃO 11: CONSUMO UNIFICADO CORRIGIDO (TARGET + VALOR CONSUMIDO)
         # ============================================================================
-        # Inicializar arrays para consumo unificado (10 anos)
-        consumo_unificado = {}
-        for ano in range(1, 11):  # 10 anos
-            consumo_unificado[f'ano_{ano}'] = 0
-
-        # Somar consumo de todas as modalidades
+        # Target Unificado: somar consumo anos 1-10 de todos os contratos
+        target_unificado = {}
+        for ano in range(1, 11):
+            target_unificado[f'ano_{ano}'] = 0
+            
+        # Somar consumo de todas as modalidades para target
         for modalidade, contratos in modalidades_dict.items():
             for contrato in contratos:
-                for ano in range(1, 11):  # 10 anos
+                for ano in range(1, 11):
                     coluna_consumo = f'CONSUMO ANO {ano}'
                     valor_consumo = pd.to_numeric(contrato.get(coluna_consumo), errors='coerce')
                     if pd.notna(valor_consumo):
-                        consumo_unificado[f'ano_{ano}'] += valor_consumo
-
-        # Formatar valores de consumo
-        consumo_formatado = {}
-        for ano in range(1, 11):  # 10 anos
-            valor = consumo_unificado[f'ano_{ano}']
-            consumo_formatado[f'ano_{ano}'] = formatar_moeda(valor) if valor > 0 else "R$ 0,00"
+                        target_unificado[f'ano_{ano}'] += valor_consumo
 
         # ============================================================================
-        # SEÇÃO 12: PROCESSAMENTO DE HISTÓRICO PARA ATÉ 10 ANOS
+        # SEÇÃO 12: VALOR CONSUMIDO - BUSCAR NA BASE HISTÓRICA
         # ============================================================================
         BaseHistorica['DataApuração'] = pd.to_datetime(BaseHistorica['Ano'].astype(str) + '-' + BaseHistorica['Mês'].astype(str).str.zfill(2))
-        BaseHistoricaCompleta['DataApuração'] = pd.to_datetime(BaseHistoricaCompleta['Ano'].astype(str) + '-' + BaseHistoricaCompleta['Mês'].astype(str).str.zfill(2))
-
-        # Processamento para cada ano (1 a 10) baseado no contrato mais antigo
-        BaseHistoricaFiltradas = {}
         
-        for ano in range(1, 11):  # Agora vai até ano 10
+        # Valor consumido: buscar na base histórica baseado no ano do contrato
+        valor_consumido = {}
+        for ano in range(1, 11):
+            # Calcular período do ano baseado no contrato mais antigo
             inicio_periodo = DataDaApuração + relativedelta(months=(ano-1)*12)
             fim_periodo = DataDaApuração + relativedelta(months=ano*12-1)
             
-            BaseHistoricaFiltradas[f'ano_{ano}'] = BaseHistorica[
+            # Filtrar histórico para este período
+            historico_ano = BaseHistorica[
                 (
                     (BaseHistorica['Codigo_PN'] == sap_principal_filtro) |
                     (BaseHistorica['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
@@ -559,17 +634,11 @@ def processar_arquivos():
                 (BaseHistorica['DataApuração'] >= inicio_periodo.strftime('%Y-%m')) &
                 (BaseHistorica['DataApuração'] <= fim_periodo.strftime('%Y-%m'))
             ]
+            
+            # Somar valores do histórico
+            valor_consumido[f'ano_{ano}'] = historico_ano['Total Gross'].sum() if not historico_ano.empty else 0
 
-        BaseHistoricaFiltradaCompleta = BaseHistoricaCompleta[
-            (
-                (BaseHistoricaCompleta['Codigo_PN'] == sap_principal_filtro) |
-                (BaseHistoricaCompleta['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
-            ) &
-            (BaseHistoricaCompleta['Item 2'].isin(lentesFiltroHistorico)) &
-            (BaseHistoricaCompleta['DataApuração'] >= DataDaApuração)
-        ]
-
-        # Cálculo dos meses passados baseado no ano atual
+        # Calcular ano atual da apuração
         ano_atual = int(AnodaApuração.split()[1])
         data_inicio_ano_atual = DataDaApuração + relativedelta(months=(ano_atual-1)*12)
         meses_apurados = (data_atual.year - data_inicio_ano_atual.year) * 12 + (data_atual.month - data_inicio_ano_atual.month)
@@ -580,69 +649,7 @@ def processar_arquivos():
         meses_passados = (meses_apurados % 12) or 12
 
         # ============================================================================
-        # SEÇÃO 13: PROCESSAMENTO DE LENTES E VALORES HISTÓRICOS
-        # ============================================================================
-        # Obter dados das lentes
-        skus = FiltrandoLentes['SKU PRODUTO'].dropna().astype(str).tolist()
-        descricoes = FiltrandoLentes['DESCRIÇÃO CONSUMO'].dropna().astype(str).tolist()
-
-        lentes_dados = [f"{sku} {desc}" for sku, desc in zip(skus, descricoes)]
-
-        if not lentes_dados:
-            lentes_dados = [
-                "ICB00 LIO TECNIS Eyhance",
-                "PCB00 LIO TECNIS ITEC PRELOADED",
-                "ZCB00 LIO TECNIS ONE",
-                "ZCT00 LIO TECNIS ONE TÓRICA",
-                "ZFR00 LIO TECNIS Synergy 0,00 R$",
-                "ZKB00 TECNIS ONE MF Low Add",
-                "ZLB00 TECNIS ONE MF Low Add",
-                "ZMA00 LIO TECNIS MF",
-                "ZMB00 TECNIS ONE MF",
-                "ZMT00 TECNIS ONE TÓRICA MF",
-                "ZXR00 TECNIS SYMFONY",
-                "ZXT00 TECNIS SYMFONY TÓRICA",
-                "DFW00 TECNIS SYNERGY TORIC SIMPLICITY",
-                "DCB00 TECNIS SIMPLICITY DCB",
-                "DIB00 TECNIS EYHANCE SIMPLICITY",
-                "DIU00 EYHANCE TORIC II SIMPLICITY",
-                "DFR00 TECNIS SYNERGY SIMPLICITY",
-                "DEN00 TECNIS PURESEE Simplicity - peça única",
-                "DET00 TECNIS PURESEE Simplicity Tórica - peça única"
-            ]
-
-        # Separando as colunas
-        lentes = [linha.split(maxsplit=1)[0] for linha in lentes_dados]
-        descricao = [linha.split(maxsplit=1)[1] for linha in lentes_dados]
-
-        # Criando DataFrames para cada ano
-        dados_lentes_anos = {}
-        for ano in range(1, 11):
-            dados_lentes_anos[f'ano_{ano}'] = pd.DataFrame({
-                "LENTES": lentes,
-                "DESCRIÇÃO CONSUMO": descricao
-            })
-
-        # Função para obter valor somado por ano
-        def obter_valor_somado_por_ano(lente, ano):
-            if f'ano_{ano}' in BaseHistoricaFiltradas:
-                valores_correspondentes = BaseHistoricaFiltradas[f'ano_{ano}'][BaseHistoricaFiltradas[f'ano_{ano}']['Item 2'] == lente]['Total Gross']
-                return valores_correspondentes.sum() if not valores_correspondentes.empty else 0
-            return 0
-
-        # Calcular valores para cada ano
-        valores_totais_anos = {}
-        for ano in range(1, 11):
-            if f'ano_{ano}' in dados_lentes_anos:
-                dados_lentes_anos[f'ano_{ano}']['VALOR TOTAL'] = dados_lentes_anos[f'ano_{ano}']['LENTES'].apply(lambda x: obter_valor_somado_por_ano(x, ano))
-                dados_lentes_anos[f'ano_{ano}'] = dados_lentes_anos[f'ano_{ano}'].drop_duplicates(subset=['LENTES'])
-                valores_totais_anos[f'ano_{ano}'] = {
-                    'valor': dados_lentes_anos[f'ano_{ano}']['VALOR TOTAL'].sum(),
-                    'formatado': formatar_moeda(dados_lentes_anos[f'ano_{ano}']['VALOR TOTAL'].sum())
-                }
-
-        # ============================================================================
-        # SEÇÃO 14: PROCESSAMENTO DE EQUIPAMENTOS
+        # SEÇÃO 13: PROCESSAMENTO DE EQUIPAMENTOS
         # ============================================================================
         EquipamentosGeraisFiltrado = EquipamentosGerais[
             (EquipamentosGerais['SAP PRINCIPAL'] == sap_principal_filtro)
@@ -650,411 +657,396 @@ def processar_arquivos():
             subset=['EQUIPAMENTO', 'DESCRIÇÃO EQUIPAMENTO', 'Nº INTERNO', 'SÉRIE']
         )
 
-        equipamentos_longo_com_cabecalho = [['SKU Equipamento', 'Descrição', 'N INTERNO', 'Série']] + EquipamentosGeraisFiltrado.iloc[::-1].values.tolist()
-        tabela_equipamentos_longo = Table(equipamentos_longo_com_cabecalho, colWidths=[100, 250])
-        tabela_equipamentos_longo.setStyle(StyleColigados)
-
         # ============================================================================
-        # SEÇÃO 15: PREPARAÇÃO DOS DADOS DO CLIENTE
+        # SEÇÃO 14: PREPARAÇÃO DOS DADOS DO CLIENTE
         # ============================================================================
         RazaoSocialCompleta = f"{row['SAP PRINCIPAL']} - {row['RAZÃO SOCIAL']}"
         
-        if pd.isnull(row['SAM']) or row['SAM'] == '':
-            InfClientes = [['Informações do Cliente'],
-                          ['Sap Principal', RazaoSocialCompleta], 
-                          ['Consultor', row['CONSULTOR']], 
-                          ['Distrital', row['DISTRITAL']], 
-                          ['Sam', '']]
-        else:
-            InfClientes = [['Informações do Cliente'],
-                          ['Sap Principal', RazaoSocialCompleta], 
-                          ['Consultor', row['CONSULTOR']], 
-                          ['Distrital', row['DISTRITAL']], 
-                          ['Sam', row['SAM']]]
+        # Obter dados das lentes para produtos consumidos
+        skus = FiltrandoLentes['SKU PRODUTO'].dropna().astype(str).tolist()
+        descricoes = FiltrandoLentes['DESCRIÇÃO CONSUMO'].dropna().astype(str).tolist()
+
+        if not skus:
+            skus = ["ZCB00", "PCB00", "ZCT00", "ICB00", "DCB00", "DIU00", "DIB00", "ZMA00", "ZKB00", "ZLB00", "ZMB00", "ZMT00", "ZXR00", "ZXT00", "ZFR00", "DFW00", "DFR00", "DEN00", "DET00"]
+            descricoes = ["LIO TECNIS ONE - peça única", "LIO TECNIS ITEC PRELOADED - peça única", "LIO TECNIS ONE TÓRICA - peça única", "LIO TECNIS Eyhance", "TECNIS SIMPLICITY DCB", "EYHANCE TORIC II SIMPLICITY", "TECNIS EYHANCE SIMPLICITY", "LIO TECNIS MF - 3 peças", "TECNIS ONE MF Low Add - Peça Única +2.75", "TECNIS ONE MF Low Add - Peça Única +3.25", "TECNIS ONE MF- Peça Única +4.00", "TECNIS ONE TÓRICA MF - Peça Única +4.00", "TECNIS SYMFONY - Peça Única", "TECNIS SYMFONY TÓRICA - Peça Únic", "LIO TECNIS Synergy", "TECNIS SYNERGY TORIC SIMPLICITY - Peça Única", "TECNIS SYNERGY SIMPLICITY - Peça Única", "TECNIS PURESEE Simplicity - peça única", "TECNIS PURESEE Simplicity Tórica - peça única"]
 
         # ============================================================================
-        # SEÇÃO 16: GERAÇÃO DO PDF NO FORMATO ORIGINAL
+        # SEÇÃO 15: GERAÇÃO DO PDF COM LAYOUT CORRIGIDO
         # ============================================================================
-        # Determinar se é PDF unificado ou individual
         tem_multiplas_modalidades = len(modalidades_dict) > 1
         
         if tem_multiplas_modalidades:
-            nome_arquivo = f"Relatório_Unificado_{sap_principal_filtro}_{AnodaApuração}.pdf"
-            print(f"Gerando PDF unificado para cliente {sap_principal_filtro} com modalidades: {', '.join(modalidades_dict.keys())}")
+            nome_arquivo = f"Relatório_Unificado_{sap_principal_filtro}_{AnodaApuração.replace(' ', '_')}.pdf"
         else:
             modalidade_unica = list(modalidades_dict.keys())[0]
-            nome_arquivo = f"Relatório_{modalidade_unica.replace(' ', '_')}_{sap_principal_filtro}_{AnodaApuração}.pdf"
-            print(f"Gerando PDF individual para cliente {sap_principal_filtro} - modalidade: {modalidade_unica}")
+            nome_arquivo = f"Relatório_{modalidade_unica.replace(' ', '_')}_{sap_principal_filtro}_{AnodaApuração.replace(' ', '_')}.pdf"
         
         # Criar PDF com ReportLab
         c = pdf_canvas.Canvas(nome_arquivo, pagesize=letter)
         width, height = letter
         
-        # Cabeçalho do relatório
+        # ============================================================================
+        # SEÇÃO 16: CABEÇALHO DO RELATÓRIO
+        # ============================================================================
+        # Logo da J&J (simulado)
+        c.setFillColor(colors.red)
+        c.rect(30, height - 60, 40, 30, fill=1)
+        c.setFillColor(colors.white)
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, height - 50, f"Relatório Apuração - {DataDaApuraçãoFormatada}")
+        c.drawString(35, height - 50, "J&J")
+        
+        # Título do relatório
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica-Bold", 16)
+        titulo_relatorio = f"Relatório Apuração - {DataDaApuraçãoFormatada}"
+        c.drawCentredString(width/2, height - 40, titulo_relatorio)
         
         y_position = height - 80
-        
+
         # ============================================================================
-        # SEÇÃO 17: INFORMAÇÕES DA APURAÇÃO
+        # SEÇÃO 17: LAYOUT CORRIGIDO - CLIENTE AO LADO DO CONTRATO
         # ============================================================================
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, y_position, "Informações da Apuração")
-        y_position -= 20
-        
-        c.setFont("Helvetica", 10)
-        c.drawString(50, y_position, f"Data Inicio {DataInicioApuraçãoFormatada}")
-        y_position -= 15
-        c.drawString(50, y_position, f"Data Fim {DataFimApuraçãoFormatada}")
-        y_position -= 15
-        c.drawString(50, y_position, f"Meses faltantes - Contrato {total_meses} Meses")
-        y_position -= 15
-        c.drawString(50, y_position, f"Meses Apurados - Ano Corrente {meses_passados}")
-        y_position -= 30
-        
-        # ============================================================================
-        # SEÇÃO 18: INFORMAÇÕES DO CONTRATO (MÚLTIPLAS MODALIDADES)
-        # ============================================================================
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, y_position, "Informações do Contrato")
-        y_position -= 20
-        
-        # Para cada modalidade, criar uma seção
+
+        # Preparar dados do cliente
+        if pd.isnull(row['SAM']) or row['SAM'] == '':
+            dados_cliente = [
+                ['Informações do Cliente'],
+                ['Sap Principal', RazaoSocialCompleta], 
+                ['Consultor', str(row['CONSULTOR'])], 
+                ['Distrital', str(row['DISTRITAL'])], 
+                ['Sam', '-']
+            ]
+        else:
+            dados_cliente = [
+                ['Informações do Cliente'],
+                ['Sap Principal', RazaoSocialCompleta], 
+                ['Consultor', str(row['CONSULTOR'])], 
+                ['Distrital', str(row['DISTRITAL'])], 
+                ['Sam', str(row['SAM'])]
+            ]
+
+        # =============================================
+        # Cliente (sempre à esquerda)
+        # =============================================
+        tabela_cliente = Table(dados_cliente, colWidths=[90, 160])
+        tabela_cliente.setStyle(StyleInformacoes)
+
+        altura_cliente = tabela_cliente.wrap(width, height)[1]
+        tabela_cliente.drawOn(c, 10, y_position - altura_cliente)
+
+        # Posição inicial para os contratos (à direita)
+        x_contrato = 320
+        y_contrato = y_position
+
+        # =============================================
+        # Modalidades em cascata (à direita)
+        # =============================================
         for modalidade, contratos in modalidades_dict.items():
-            contrato_principal = contratos[0]  # Pegar o primeiro contrato da modalidade
-            
-            c.setFont("Helvetica", 10)
-            c.drawString(50, y_position, f"Modalidade {modalidade}")
-            y_position -= 15
-            c.drawString(50, y_position, f"Nº Contrato {contrato_principal.get('Nº CONTRATO', 'N/A')}")
-            y_position -= 15
-            c.drawString(50, y_position, f"Versão Contratual {contrato_principal.get('VERSÃO', 'N/A')}")
-            y_position -= 15
-            
-            # Calcular vigência específica desta modalidade
-            try:
-                if isinstance(contrato_principal['DT. INÍCIO'], (int, float)) and contrato_principal['DT. INÍCIO'] > 60:
-                    data_inicio_modal = data_base_excel + timedelta(contrato_principal['DT. INÍCIO'] - pd.Timedelta(days=2))
-                else:
-                    data_inicio_modal = pd.to_datetime(contrato_principal['DT. INÍCIO'])
-                    
-                if isinstance(contrato_principal['DT. FINAL'], (int, float)) and contrato_principal['DT. FINAL'] > 60:
-                    data_fim_modal = data_base_excel + timedelta(contrato_principal['DT. FINAL'] - pd.Timedelta(days=2))
-                else:
-                    data_fim_modal = pd.to_datetime(contrato_principal['DT. FINAL'])
-                    
-            except (TypeError, ValueError):
-                serial_inicio = int(contrato_principal['DT. INÍCIO'])
-                serial_fim = int(contrato_principal['DT. FINAL'])
-                data_inicio_modal = datetime(1900, 1, 1) + timedelta(days=serial_inicio - 2)
-                data_fim_modal = datetime(1900, 1, 1) + timedelta(days=serial_fim - 2)
-            
-            vigencia_modal = f"{data_inicio_modal.strftime('%d/%m/%Y')} - {data_fim_modal.strftime('%d/%m/%Y')}"
-            c.drawString(50, y_position, f"Vigência Contratual {vigencia_modal}")
-            y_position -= 15
-            
-            # Início da apuração específica desta modalidade
-            data_apuracao_modal = data_base_excel + timedelta(contrato_principal.get('INICIO DA APURAÇÃO'))
-            mes_modal = meses_portugues[data_apuracao_modal.month]
-            ano_modal = data_apuracao_modal.year
-            c.drawString(50, y_position, f"Inicio da Apuração {mes_modal} de {ano_modal}")
-            y_position -= 25
-            
-            # Se há múltiplas modalidades, adicionar separador
-            if len(modalidades_dict) > 1:
-                c.line(50, y_position, width - 50, y_position)
-                y_position -= 15
+            for contrato in contratos:
+                dados_contrato = [
+                    ['Informações do Contrato'],
+                    ['Modalidade', modalidade],
+                    ['Nº Contrato', str(contrato.get('Nº CONTRATO', 'N/A'))],
+                    ['Versão Contratual', str(contrato.get('VERSÃO', 'Contrato Raiz'))],
+                    ['Vigência Contratual', Vigencia],
+                    ['Inicio da Apuração', DataDaApuraçãoFormatada]
+                ]
+
+            tabela_contrato = Table(dados_contrato, colWidths=[100, 160])
+            tabela_contrato.setStyle(StyleInformacoes)
+
+            altura_contrato = tabela_contrato.wrap(width, height)[1]
+
+            # Quebra de página se não couber
+            if y_contrato - altura_contrato < 50:
+                c.showPage()
+                y_contrato = height - 50
+
+            tabela_contrato.drawOn(c, x_contrato, y_contrato - altura_contrato)
+
+            # Próxima tabela um pouco abaixo (cascata)o
+            y_contrato -= altura_contrato + 10
+
+        # =============================================
+        # Ajusta y_position geral
+        # =============================================
+        y_position = min(y_position - altura_cliente, y_contrato) - 20
+
+        # ============================================================================
+        # SEÇÃO 18: INFORMAÇÕES DA APURAÇÃO (EMBAIXO)
+        # ============================================================================
+        dados_apuracao = [
+            ['Informações da Apuração'],
+            ['Data Inicio', DataInicioApuraçãoFormatada],
+            ['Data Fim', DataFimApuraçãoFormatada],
+            ['Meses faltantes - Contrato', f"{total_meses} Meses"],
+            ['Meses Apurados - Ano Corrente', str(meses_passados)]
+        ]
         
-        # ============================================================================
-        # SEÇÃO 19: INFORMAÇÕES DO CLIENTE
-        # ============================================================================
-        if y_position < 200:
-            c.showPage()
-            y_position = height - 50
-            
-        tabela_info_cliente = Table(InfClientes, colWidths=[120, 300])
-        tabela_info_cliente.setStyle(StyleTituloMudado)
-        tabela_info_cliente.wrapOn(c, width, height)
-        tabela_info_cliente.drawOn(c, 50, y_position - tabela_info_cliente.wrap(width, height)[1])
-        y_position -= tabela_info_cliente.wrap(width, height)[1] + 30
+        tabela_apuracao = Table(dados_apuracao, colWidths=[150, 200])
+        tabela_apuracao.setStyle(StyleInformacoes)
         
+        altura_tabela_apuracao = tabela_apuracao.wrap(350, height)[1]
+        tabela_apuracao.drawOn(c, 50, y_position - altura_tabela_apuracao)
+        y_position -= altura_tabela_apuracao + 30
+
         # ============================================================================
-        # SEÇÃO 20: CONSUMO UNIFICADO (10 ANOS)
+        # SEÇÃO 19: CONSUMO UNIFICADO (5 ANOS COMO NA FOTO)
         # ============================================================================
         if y_position < 300:
             c.showPage()
             y_position = height - 50
-            
+
         # Criar tabela de consumo unificado (10 anos)
         consumo_data = [['Consumo Unificado']]
-        consumo_headers = []
-        consumo_meta = []
-        consumo_target = []
-        consumo_valores = []
-        consumo_percentual = []
-        
-        # Cabeçalhos e dados para 10 anos
+
+        # Cabeçalhos para 10 anos
+        anos_headers = [''] + [f'Ano {i}' for i in range(1, 11)]
+        consumo_data.append(anos_headers)
+
+        # Meta %
+        meta_row = ['Meta %'] + ['100%'] * 10
+        consumo_data.append(meta_row)
+
+        # Target - P307232231(conceito)
+        target_row = ['Target - P307232231(conceito)']
         for ano in range(1, 11):
-            consumo_headers.append(f'Ano {ano}')
-            consumo_meta.append('100%')  # Meta sempre 100%
-            
-            # Target - usar do primeiro contrato encontrado ou calcular
-            if f'TARGET ANO {ano}' in contrato_referencia:
-                target_valor = pd.to_numeric(contrato_referencia.get(f'TARGET ANO {ano}'), errors='coerce')
-                if pd.notna(target_valor):
-                    consumo_target.append(formatar_moeda(target_valor))
-                else:
-                    consumo_target.append('R$ 0,00')
+            valor_target = target_unificado.get(f'ano_{ano}', 0)
+            target_row.append(formatar_moeda(valor_target))
+        consumo_data.append(target_row)
+
+        # Target Unificado
+        target_unif_row = ['Target Unificado']
+        for ano in range(1, 11):
+            valor_target = target_unificado.get(f'ano_{ano}', 0)
+            target_unif_row.append(formatar_moeda(valor_target))
+        consumo_data.append(target_unif_row)
+
+        # Valor Consumido - Unificado
+        valor_consumido_row = ['Valor Consumido - Unificado']
+        for ano in range(1, 11):
+            valor_consumido_ano = valor_consumido.get(f'ano_{ano}', 0)
+            valor_consumido_row.append(formatar_moeda(valor_consumido_ano))
+        consumo_data.append(valor_consumido_row)
+
+        # Percentual de Atingimento
+        percentual_row = ['Percentual de Atingimento']
+        for ano in range(1, 11):
+            target_num = target_unificado.get(f'ano_{ano}', 0)
+            consumido_num = valor_consumido.get(f'ano_{ano}', 0)
+            if target_num > 0 and consumido_num > 0:
+                percentual = (consumido_num / target_num) * 100
+                percentual_row.append(f'{percentual:.2f}%')
             else:
-                consumo_target.append('R$ 0,00')
-            
-            # Valor consumido unificado
-            consumo_valores.append(consumo_formatado[f'ano_{ano}'])
-            
-            # Calcular percentual de atingimento
-            target_num = pd.to_numeric(contrato_referencia.get(f'TARGET ANO {ano}'), errors='coerce') if f'TARGET ANO {ano}' in contrato_referencia else 0
-            consumo_num = consumo_unificado[f'ano_{ano}']
-            
-            if target_num > 0 and consumo_num > 0:
-                percentual = (consumo_num / target_num) * 100
-                consumo_percentual.append(f'{percentual:.2f}%')
-            else:
-                consumo_percentual.append('0.00%')
-        
-        # Construir tabela
-        consumo_data.append(consumo_headers)
-        consumo_data.append(['Meta %'] + consumo_meta)
-        consumo_data.append(['Target - Unificado'] + consumo_target)
-        consumo_data.append(['Valor Consumido - Unificado'] + consumo_valores)
-        consumo_data.append(['Percentual de Atingimento'] + consumo_percentual)
-        
-        # Ajustar largura das colunas para 10 anos
-        col_width = (width - 200) / 11  # 11 colunas (1 label + 10 anos)
-        col_widths = [120] + [col_width] * 10
-        
+                percentual_row.append('0.00%')
+        consumo_data.append(percentual_row)
+
+        # Ajustar largura das colunas para 10 anos + rótulo
+        col_width = (width - 200) / 11  # 1 label + 10 anos
+        col_widths = [150] + [col_width] * 10
+
         tabela_consumo = Table(consumo_data, colWidths=col_widths)
-        tabela_consumo.setStyle(StyleTituloMudado)
-        tabela_consumo.wrapOn(c, width, height)
-        
-        if y_position - tabela_consumo.wrap(width, height)[1] < 50:
+        tabela_consumo.setStyle(StyleConsumoUnificado)
+
+        altura_tabela_consumo = tabela_consumo.wrap(width, height)[1]
+        if y_position - altura_tabela_consumo < 50:
             c.showPage()
             y_position = height - 50
-        
-        tabela_consumo.drawOn(c, 50, y_position - tabela_consumo.wrap(width, height)[1])
-        y_position -= tabela_consumo.wrap(width, height)[1] + 30
-        
+
+        tabela_consumo.drawOn(c, 50, y_position - altura_tabela_consumo)
+        y_position -= altura_tabela_consumo + 30
+
         # ============================================================================
-        # SEÇÃO 21: COLIGADOS
-        # ============================================================================
-        if not ColigadosFiltrado.empty:
-            if y_position < 200:
-                c.showPage()
-                y_position = height - 50
-            
-            coligados_data = [['Coligados']]
-            coligados_data.append(['Sap Coligado', 'Razão Social'])
-            
-            for _, coligado in ColigadosFiltrado.iterrows():
-                coligados_data.append([str(coligado['CÓDIGO SAP']), coligado['RAZÃO SOCIAL']])
-            
-            tabela_coligados = Table(coligados_data, colWidths=[100, 300])
-            tabela_coligados.setStyle(StyleColigados)
-            tabela_coligados.wrapOn(c, width, height)
-            
-            if y_position - tabela_coligados.wrap(width, height)[1] < 50:
-                c.showPage()
-                y_position = height - 50
-            
-            tabela_coligados.drawOn(c, 50, y_position - tabela_coligados.wrap(width, height)[1])
-            y_position -= tabela_coligados.wrap(width, height)[1] + 30
-        
-        # ============================================================================
-        # SEÇÃO 22: PRODUTOS CONSUMIDOS COBRANÇA ANUAL
+        # SEÇÃO 20: PRODUTOS CONSUMIDOS COBRANÇA ANUAL
         # ============================================================================
         if y_position < 400:
             c.showPage()
             y_position = height - 50
         
-        # Usar dados do ano atual da apuração
-        ano_atual_num = int(AnodaApuração.split()[1])
-        dados_lentes_ano_atual = dados_lentes_anos.get(f'ano_{ano_atual_num}', dados_lentes_anos['ano_1'])
-        valor_total_ano_atual = valores_totais_anos.get(f'ano_{ano_atual_num}', valores_totais_anos['ano_1'])
+        # Calcular valores para o ano atual
+        ano_atual_num = min(ano_atual, 5)  # Limitar a 5 anos como na foto
+        valor_total_ano_atual = valor_consumido.get(f'ano_{ano_atual_num}', 0)
+        target_ano_atual = target_unificado.get(f'ano_{ano_atual_num}', 0)
         
-        # Target unificado do ano atual
-        target_ano_atual = 0
-        for modalidade, contratos in modalidades_dict.items():
-            for contrato in contratos:
-                target_valor = pd.to_numeric(contrato.get(f'CONSUMO ANO {ano_atual_num}'), errors='coerce')
-                if pd.notna(target_valor):
-                    target_ano_atual += target_valor
-        
-        target_formatado = formatar_moeda(target_ano_atual)
-        diferenca = valor_total_ano_atual['valor'] - target_ano_atual
-        diferenca_formatada = formatar_moeda(diferenca)
-        
-        # Cálculo da multa (exemplo simples)
+        diferenca = valor_total_ano_atual - target_ano_atual
         multa = abs(diferenca) * 0.1 if diferenca < 0 else 0
-        multa_formatada = formatar_moeda(multa)
         
         produtos_data = [['Produtos Consumidos Cobrança Anual']]
-        produtos_data.append(['LENTES', 'DESCRIÇÃO CONSUMO', 'VALOR TOTAL', 'TARGET UNIFICADO', 'DIFERENÇA', 'CÁLCULO DE MULTA'])
+        produtos_data.append(['LENTES', 'DESCRIÇÃO', 'CONSUMO', 'VALOR TOTAL', 'TARGET UNIFICADO', 'DIFERENÇA', 'CÁLCULO DE MULTA'])
         
-        for _, produto in dados_lentes_ano_atual.iterrows():
-            valor_produto = formatar_moeda(produto['VALOR TOTAL'])
+        # Buscar valores específicos por SKU para o ano atual
+        inicio_periodo_atual = DataDaApuração + relativedelta(months=(ano_atual_num-1)*12)
+        fim_periodo_atual = DataDaApuração + relativedelta(months=ano_atual_num*12-1)
+        
+        for i, sku in enumerate(skus):
+            descricao = descricoes[i] if i < len(descricoes) else ""
+            
+            # Buscar consumo específico do SKU
+            historico_sku = BaseHistorica[
+                (
+                    (BaseHistorica['Codigo_PN'] == sap_principal_filtro) |
+                    (BaseHistorica['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
+                ) &
+                (BaseHistorica['Item 2'] == sku) &
+                (BaseHistorica['DataApuração'] >= inicio_periodo_atual.strftime('%Y-%m')) &
+                (BaseHistorica['DataApuração'] <= fim_periodo_atual.strftime('%Y-%m'))
+            ]
+            
+            consumo_sku = historico_sku['Quantidade'].sum() if not historico_sku.empty else 0
+            valor_sku = historico_sku['Total Gross'].sum() if not historico_sku.empty else 0
+            
             produtos_data.append([
-                produto['LENTES'], 
-                produto['DESCRIÇÃO CONSUMO'], 
-                valor_produto,
-                '', '', ''  # Valores específicos por produto podem ser adicionados aqui
+                sku, 
+                descricao, 
+                str(int(consumo_sku)) if consumo_sku > 0 else "0",
+                formatar_moeda(valor_sku),
+                "", "", ""  # Valores específicos por produto podem ser calculados se necessário
             ])
         
         # Linha de totais
-        produtos_data.append(['', '', valor_total_ano_atual['formatado'], target_formatado, diferenca_formatada, multa_formatada])
+        produtos_data.append([
+            '', '', '', 
+            formatar_moeda(valor_total_ano_atual), 
+            formatar_moeda(target_ano_atual), 
+            formatar_moeda(diferenca), 
+            formatar_moeda(multa)
+        ])
         
-        tabela_produtos = Table(produtos_data, colWidths=[60, 200, 80, 80, 80, 80])
-        tabela_produtos.setStyle(StyleBaseHistorica)
-        tabela_produtos.wrapOn(c, width, height)
+        tabela_produtos = Table(produtos_data, colWidths=[50, 100, 80, 120, 120, 120])
+        tabela_produtos.setStyle(styleConsumo)
         
-        if y_position - tabela_produtos.wrap(width, height)[1] < 50:
+        altura_tabela_produtos = tabela_produtos.wrap(width, height)[1]
+        if y_position - altura_tabela_produtos < 50:
             c.showPage()
             y_position = height - 50
         
-        tabela_produtos.drawOn(c, 50, y_position - tabela_produtos.wrap(width, height)[1])
-        y_position -= tabela_produtos.wrap(width, height)[1] + 30
-        
+        tabela_produtos.drawOn(c, 50, y_position - altura_tabela_produtos)
+        y_position -= altura_tabela_produtos + 30
+
         # ============================================================================
-        # SEÇÃO 23: EQUIPAMENTOS
-        # ============================================================================
-        if not EquipamentosGeraisFiltrado.empty:
-            if y_position < 200:
-                c.showPage()
-                y_position = height - 50
-            
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(50, y_position, "Equipamentos")
-            y_position -= 20
-            
-            tabela_equipamentos_longo.wrapOn(c, width, height)
-            if y_position - tabela_equipamentos_longo.wrap(width, height)[1] < 50:
-                c.showPage()
-                y_position = height - 50
-            
-            tabela_equipamentos_longo.drawOn(c, 50, y_position - tabela_equipamentos_longo.wrap(width, height)[1])
-            y_position -= tabela_equipamentos_longo.wrap(width, height)[1] + 30
-        
-        # ============================================================================
-        # SEÇÃO 24: EXTRATO DE CONSUMO - VISÃO GERAL
+        # SEÇÃO 22: EXTRATO DE CONSUMO - VISÃO GERAL
         # ============================================================================
         if y_position < 300:
             c.showPage()
             y_position = height - 50
-        
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, y_position, "Extrato de Consumo - Visão Geral")
-        y_position -= 30
-        
-        # Buscar dados do histórico para o extrato
-        extrato_data = [['SAP Principal', 'Razão Social', 'SKU Produto', 'Descrição Produto', 'Quantidade', 'Valor Total', 'Mês', 'Ano']]
-        
-        # Obter dados do BaseHistoricaCompleta
-        historico_detalhado = BaseHistoricaCompleta[
+
+        # Cabeçalho fixo da tabela
+        cabecalho = ['SAP Principal', 'Razão Social', 'SKU', 'Quantidade', 'Valor', 'Mês', 'Ano']
+
+        # Buscar dados do histórico
+        historico_extrato = BaseHistorica[
             (
-                (BaseHistoricaCompleta['Codigo_PN'] == sap_principal_filtro) |
-                (BaseHistoricaCompleta['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
+                (BaseHistorica['Codigo_PN'] == sap_principal_filtro) |
+                (BaseHistorica['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
             ) &
-            (BaseHistoricaCompleta['Item 2'].isin(lentesFiltroHistorico))
+            (BaseHistorica['Item 2'].isin(lentesFiltroHistorico))
         ].copy()
-        
+
+        # Agregar por Codigo_PN, RAZÃO SOCIAL, Item 2, Mês e Ano somando Quantidade e Total Gross
+        historico_agrupado = historico_extrato.groupby(
+            ['Codigo_PN', 'Nome_PN', 'Item 2', 'Mês', 'Ano'],
+            as_index=False
+        ).agg({
+            'Quantidade': 'sum',
+            'Total Gross': 'sum'
+        })
+
         # Ordenar por ano e mês (mais recente primeiro)
-        historico_detalhado = historico_detalhado.sort_values(['Ano', 'Mês'], ascending=[False, False])
-        
-        # Pegar apenas os últimos registros para não sobrecarregar o PDF
-        historico_detalhado = historico_detalhado.head(50)  # Limitar a 50 registros
-        
-        for _, registro in historico_detalhado.iterrows():
-            quantidade = registro.get('Quantity', 0)
+        historico_agrupado = historico_agrupado.sort_values(['Ano', 'Mês'], ascending=[False, False])
+
+        # Montar apenas os dados
+        extrato_dados = []
+        for _, registro in historico_agrupado.iterrows():
+            quantidade = int(registro.get('Quantidade', 0)) if pd.notna(registro.get('Quantidade', 0)) else 0
             valor_total = formatar_moeda(registro.get('Total Gross', 0))
-            razao_social = row['RAZÃO SOCIAL'] if registro['Codigo_PN'] == sap_principal_filtro else 'COLIGADO'
-            
-            extrato_data.append([
+            razao_social = registro['Nome_PN'][:25] + "..." if len(str(registro['Nome_PN'])) > 25 else str(registro['Nome_PN'])
+
+            extrato_dados.append([
                 str(registro['Codigo_PN']),
                 razao_social,
-                registro.get('Item 2', ''),
-                registro.get('Item', ''),
-                str(int(quantidade)) if pd.notna(quantidade) else '0',
+                str(registro.get('Item 2', '')),
+                str(quantidade),
                 valor_total,
                 str(registro.get('Mês', '')),
                 str(registro.get('Ano', ''))
             ])
-        
-        # Se há dados no extrato, criar tabela
-        if len(extrato_data) > 1:
-            tabela_extrato = Table(extrato_data, colWidths=[70, 120, 60, 120, 50, 70, 30, 40])
-            tabela_extrato.setStyle(StyleBaseHistorica)
-            tabela_extrato.wrapOn(c, width, height)
-            
-            if y_position - tabela_extrato.wrap(width, height)[1] < 50:
-                c.showPage()
-                y_position = height - 50
-            
-            tabela_extrato.drawOn(c, 50, y_position - tabela_extrato.wrap(width, height)[1])
+
+        # =====================================================================
+        # DESENHAR A TABELA EM PARTES (para caber nas páginas)
+        # =====================================================================
+        if extrato_dados:  # Se há dados
+
+            max_linhas_por_pagina = 40  # ajusta conforme necessário
+            for i in range(0, len(extrato_dados), max_linhas_por_pagina):
+                bloco = extrato_dados[i:i+max_linhas_por_pagina]
+
+                # Recoloca o cabeçalho no topo de cada página
+                bloco_com_header = [cabecalho] + bloco  
+
+                tabela_extrato = Table(bloco_com_header, colWidths=[70, 120, 60, 50, 70, 30, 40])
+                tabela_extrato.setStyle(StyleBaseHistorica)
+
+                altura_tabela_extrato = tabela_extrato.wrap(width, height)[1]
+
+                if y_position - altura_tabela_extrato < 50:
+                    c.showPage()
+                    y_position = height - 50
+
+                tabela_extrato.drawOn(c, 50, y_position - altura_tabela_extrato)
+                y_position -= altura_tabela_extrato + 30
 
         # ============================================================================
-        # SEÇÃO 25: UPLOAD PARA BOX
+        # SEÇÃO 23: FINALIZAR PDF E UPLOAD
         # ============================================================================
-            c.save()
-            print(f"PDF gerado: {nome_arquivo}")
+        c.save()
+        print(f"PDF gerado: {nome_arquivo}")
 
-            try:
-                if access_token:
-                    headers = {'Authorization': f'Bearer {access_token}'}
+        # Upload para Box
+        try:
+            if access_token:
+                headers = {'Authorization': f'Bearer {access_token}'}
+                
+                files = {
+                    'attributes': (None, f'{{"name": "{nome_arquivo}", "parent": {{"id": "{FOLDER_ID}"}}}}', 'application/json'),
+                    'file': (nome_arquivo, open(nome_arquivo, 'rb'), 'application/pdf')
+                }
+                
+                response = requests.post(UPLOAD_URL, headers=headers, files=files)
+                files['file'][1].close()
+                
+                if response.status_code in [200, 201]:
+                    print(f"✅ Arquivo {nome_arquivo} enviado com sucesso para o Box!")
+                else:
+                    print(f"❌ Erro ao enviar {nome_arquivo}: {response.text}")
                     
-                    files = {
-                        'attributes': (None, f'{{"name": "{nome_arquivo}", "parent": {{"id": "{FOLDER_ID}"}}}}', 'application/json'),
-                        'file': (nome_arquivo, open(nome_arquivo, 'rb'), 'application/pdf')
-                    }
-                    
-                    response = requests.post(UPLOAD_URL, headers=headers, files=files)
-                    files['file'][1].close()
-                    
-                    if response.status_code in [200, 201]:
-                        print(f"✅ Arquivo {nome_arquivo} enviado com sucesso para o Box!")
-                    else:
-                        print(f"❌ Erro ao enviar {nome_arquivo}: {response.text}")
+                    # Tentar refresh do token
+                    try:
+                        refresh_access_token()
+                        headers = {'Authorization': f'Bearer {access_token_global}'}
                         
-                        # Tentar refresh do token
-                        try:
-                            refresh_access_token()
-                            headers = {'Authorization': f'Bearer {access_token_global}'}
+                        files = {
+                            'attributes': (None, f'{{"name": "{nome_arquivo}", "parent": {{"id": "{FOLDER_ID}"}}}}', 'application/json'),
+                            'file': (nome_arquivo, open(nome_arquivo, 'rb'), 'application/pdf')
+                        }
+                        
+                        response = requests.post(UPLOAD_URL, headers=headers, files=files)
+                        files['file'][1].close()
+                        
+                        if response.status_code in [200, 201]:
+                            print(f"✅ Arquivo {nome_arquivo} enviado com sucesso após refresh do token!")
+                        else:
+                            print(f"❌ Erro persistente ao enviar {nome_arquivo}: {response.text}")
                             
-                            files = {
-                                'attributes': (None, f'{{"name": "{nome_arquivo}", "parent": {{"id": "{FOLDER_ID}"}}}}', 'application/json'),
-                                'file': (nome_arquivo, open(nome_arquivo, 'rb'), 'application/pdf')
-                            }
-                            
-                            response = requests.post(UPLOAD_URL, headers=headers, files=files)
-                            files['file'][1].close()
-                            
-                            if response.status_code in [200, 201]:
-                                print(f"✅ Arquivo {nome_arquivo} enviado com sucesso após refresh do token!")
-                            else:
-                                print(f"❌ Erro persistente ao enviar {nome_arquivo}: {response.text}")
-                                
-                        except Exception as refresh_error:
-                            print(f"❌ Erro ao fazer refresh do token: {refresh_error}")
-                            
-            except Exception as upload_error:
-                print(f"❌ Erro no upload: {upload_error}")
+                    except Exception as refresh_error:
+                        print(f"❌ Erro ao fazer refresh do token: {refresh_error}")
+                        
+        except Exception as upload_error:
+            print(f"❌ Erro no upload: {upload_error}")
 
-        print("PDF criados")
+    print("Processamento concluído!")
+    messagebox.showinfo("Concluído", f"Foram processados {contador} clientes com sucesso!")
 
-      
                     
-    else:
-        messagebox.showerror("Erro", "Selecione os arquivos.")
-
-  
 def selecionar_arquivo1():
     caminho_arquivo1.set(
         filedialog.askopenfilename(
@@ -1206,15 +1198,16 @@ def abrir_poupup_serial():
         print(f"Data gerada: {DateValue}")
         print(f"SAP Único? {SapSelecionado}")
         print(f"Valor SAP: {ValorSAP}")
-
+        
+        popup.destroy()
         processar_arquivos()
 
     tk.Button(frame, text="Confirmar", command=validar_access_key).grid(row=12, column=0, pady=(10, 10))
 
 
-    
-
-
+# ============================================================================
+# INTERFACE GRÁFICA
+# ============================================================================
 window = tk.Tk()
 window.geometry("509x250")
 window.configure(bg="#FFFFFF")
