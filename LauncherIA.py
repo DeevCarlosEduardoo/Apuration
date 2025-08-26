@@ -33,6 +33,9 @@ import os
 from tkinter import ttk
 import calendar
 import datetime as dt
+import math
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
 # === CONFIGURAÇÕES BOX ===
 CLIENT_ID = 'zkacla486aw46nrxpk58oapx4aqm84ze'
@@ -298,50 +301,7 @@ def processar_arquivos():
             ('INNERGRID', (0, 1), (-1, -1), 0, colors.white),  # Sem grade interna
             ('BOX', (0, 1), (-1, -1), 0, colors.white),  # Sem borda externa
         ])
-
-    # Estilo para a tabela de consumo unificado
-
-    # Determinar se o resultado >= 100 para aplicar cor vermelha
-    
-
-    StyleConsumoUnificado = TableStyle([
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 5),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('TOPPADDING', (0, 0), (-1, -1), 1),
-        # Cabeçalho
-        ('SPAN', (0, 0), (-1, 0)),
-        ('BACKGROUND', (0, 0), (-1, 0), (192/255, 0/255, 10/255)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
-        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
-        ('FONTSIZE', (0, 0), (-1, 0), 6),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        # Segunda linha
-        ('BACKGROUND', (0, 1), (-1, 1), (192/255, 0/255, 10/255)),
-        ('TEXTCOLOR', (0, 1), (-1, 1), colors.white),
-        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
-        # Terceira linha
-        ('BACKGROUND', (0, 2), (-1, 2), (230/255, 230/255, 230/255)),
-        ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
-        ('ALIGN', (0, 2), (-1, 2), 'LEFT'),
-        # Primeira coluna da terceira linha pra baixo
-        ('BACKGROUND', (0, 2), (0, -1), (230/255, 230/255, 230/255)),
-        ('TEXTCOLOR', (0, 2), (0, -1), colors.black),
-        # Títulos das linhas restantes
-        ('TEXTCOLOR', (0, 3), (0, -1), colors.black),
-        ('FONTNAME', (0, 3), (0, -1), 'Helvetica-Bold'),
-        # Fundo restante
-        ('BACKGROUND', (1, 3), (-1, -1), colors.white),
-        # Coluna destacada em negrito
-        ('FONTNAME', (1, 2), (1, -1), 'Helvetica-Bold'),
-        # Grade
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-    ])
+   
 
     StyleColigados = TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
@@ -391,61 +351,34 @@ def processar_arquivos():
             ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Borda externa
 
             ])
-    styleConsumo = TableStyle([
-                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                        ('FONTSIZE', (0, 0), (-1, -1), 4),  # Tamanho da fonte para todas as células
-                        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-                        ('TOPPADDING', (0, 0), (-1, -1), 1),
-                        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-                        
-                        # Mescla as colunas 1 e 2 na primeira linha
-                        ('SPAN', (0, 0), (1, 0)),  
+    
+      # Style para equipamentos
+    StyleEquipamentos = TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                
+                # Cabeçalho principal
+                ('SPAN', (0, 0), (-1, 0)),
+                ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                
+                # Sub-cabeçalho
+                ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
+                ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+                ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
+                
+                # Bordas
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('INNERGRID', (0, 1), (-1, -1), 0.5, colors.lightgrey),
+            ])
 
-                        # Mescla as colunas 3, 4 e 5 na primeira linha
-                        ('SPAN', (2, 0), (4, 0)),
-
-                        # Mescla a quarta, quinta e sexta colunas a partir da terceira linha
-                        ('SPAN', (3, 2), (3, -1)),  
-                        ('SPAN', (4, 2), (4, -1)),  
-                        ('SPAN', (5, 2), (5, -1)),  
-                        
-                        # Aumenta o tamanho da fonte das colunas mescladas a partir da terceira linha
-                        ('FONTSIZE', (3, 2), (3, -1), 9),  
-                        ('FONTSIZE', (4, 2), (4, -1), 9),  
-                        ('FONTSIZE', (5, 2), (5, -1), 9),  
-
-                        # Formatação da primeira linha (cabeçalho)
-                        ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),  # Fundo azul-escuro
-                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Texto branco
-                        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alinhamento centralizado
-                        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),  # Linha acima da primeira linha
-                        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),  # Linha abaixo da primeira linha
-                        ('FONTSIZE', (0, 0), (-1, 0), 6),  # Aumenta o tamanho da fonte na primeira linha
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Negrito na primeira linha
-
-                        # Formatação da segunda linha
-                        ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),  # Fundo cinza claro
-                        ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),  # Texto em negrito na segunda linha
-
-                        # Fundo azul claro para as colunas 3 a 5 na primeira linha
-                        ('BACKGROUND', (2, 0), (4, 0), (132/255, 150/255, 175/255)),  # Fundo azul claro para as colunas 3 a 5
-
-                        # Divisões da tabela com cinza claro
-                        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Grade interna
-                        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),  # Borda externa
-
-                        ('ALIGN', (5, 0), (5, 0), 'CENTER'),  # Alinhamento centralizado da coluna 6
-                        ('VALIGN', (5, 0), (5, 0), 'MIDDLE'),  # Alinhamento vertical no meio
-                        ('FONTSIZE', (5, 0), (5, 0), 6),  # Tamanho da fonte ajustado
-                        ('COLWIDTH', (5, 0), (5, -1), 50),
-                        ('TEXTCOLOR', (4, 3), (5, -1), colors.green),  
-                        ('FONTNAME', (4, 3), (5, -1), 'Helvetica-Bold'),
-                    ])
 
     messagebox.showinfo("Salvar Arquivos", "Iniciar o processo de salvar!")
 
@@ -538,6 +471,7 @@ def processar_arquivos():
         # ============================================================================
         # SEÇÃO 9: CALCULAR DATA DE REFERÊNCIA (CONTRATO MAIS ANTIGO)
         # ============================================================================
+        
         data_inicio_mais_antiga = None
         contrato_referencia = None
         
@@ -594,6 +528,58 @@ def processar_arquivos():
         Vigencia = f"{DataInicioFormatada} - {DataFimFormatada}"
 
         AnodaApuração = calcular_ano_referencia(DataInicioFormatada)
+
+        # ============================================================================
+        # AJSUTANDO STYLE DO CONSUMO UNIFICADO 
+        # ============================================================================
+
+        coluna_destacada = {
+            'Ano 1': 1,
+            'Ano 2': 2,
+            'Ano 3': 3,
+            'Ano 4': 4,
+            'Ano 5': 5
+        }.get(AnodaApuração, 1)
+        StyleConsumoUnificado = TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 5),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+        ('TOPPADDING', (0, 0), (-1, -1), 1),
+        # Cabeçalho
+        ('SPAN', (0, 0), (-1, 0)),
+        ('BACKGROUND', (0, 0), (-1, 0), (192/255, 0/255, 10/255)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
+        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),
+        ('FONTSIZE', (0, 0), (-1, 0), 6),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        # Segunda linha
+        ('BACKGROUND', (0, 1), (-1, 1), (192/255, 0/255, 10/255)),
+        ('TEXTCOLOR', (0, 1), (-1, 1), colors.white),
+        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
+        # Terceira linha
+        ('BACKGROUND', (0, 2), (-1, 2), (230/255, 230/255, 230/255)),
+        ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+        ('ALIGN', (0, 2), (-1, 2), 'LEFT'),
+        # Primeira coluna da terceira linha pra baixo
+        ('BACKGROUND', (0, 2), (0, -1), (230/255, 230/255, 230/255)),
+        ('TEXTCOLOR', (0, 2), (0, -1), colors.black),
+        # Títulos das linhas restantes
+        ('TEXTCOLOR', (0, 3), (0, -1), colors.black),
+        ('FONTNAME', (0, 3), (0, -1), 'Helvetica-Bold'),
+        # Fundo restante
+        ('BACKGROUND', (1, 3), (-1, -1), colors.white),
+        # Coluna destacada em negrito
+        ('FONTNAME', (coluna_destacada, 2), (coluna_destacada, -1), 'Helvetica-Bold'),
+        # Grade
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+    ])
+    
+        
 
         # ============================================================================
         # SEÇÃO 11: CONSUMO UNIFICADO CORRIGIDO (TARGET + VALOR CONSUMIDO)
@@ -746,7 +732,7 @@ def processar_arquivos():
                 dados_contrato = [
                     ['Informações do Contrato'],
                     ['Modalidade', modalidade],
-                    ['Nº Contrato', str(contrato.get('Nº CONTRATO', 'N/A'))],
+                    ['Nº Contrato', str(contrato.get('Nº INTERNO', 'N/A'))],
                     ['Versão Contratual', str(contrato.get('VERSÃO', 'Contrato Raiz'))],
                     ['Vigência Contratual', Vigencia],
                     ['Inicio da Apuração', DataDaApuraçãoFormatada]
@@ -787,63 +773,84 @@ def processar_arquivos():
         tabela_apuracao.setStyle(StyleInformacoes)
         
         altura_tabela_apuracao = tabela_apuracao.wrap(350, height)[1]
-        tabela_apuracao.drawOn(c, 50, y_position - altura_tabela_apuracao)
+        tabela_apuracao.drawOn(c, 10, y_position - altura_tabela_apuracao)
         y_position -= altura_tabela_apuracao + 30
 
         # ============================================================================
-        # SEÇÃO 19: CONSUMO UNIFICADO (5 ANOS COMO NA FOTO)
+        # SEÇÃO 19: CONSUMO UNIFICADO (10 ANOS, SUPORTE A MÚLTIPLAS MODALIDADES)
         # ============================================================================
+        # Descobre o maior prazo em anos (arredondado para cima)
+        max_anos = 0
+        for contratos in modalidades_dict.values():
+            for contrato in contratos:
+                prazo_meses = contrato.get('PRAZO APURACAO', 0)  # em meses
+                prazo_anos = math.ceil(prazo_meses / 12)          # converte para anos
+                if prazo_anos > max_anos:
+                    max_anos = prazo_anos
         if y_position < 300:
             c.showPage()
             y_position = height - 50
 
-        # Criar tabela de consumo unificado (10 anos)
         consumo_data = [['Consumo Unificado']]
 
         # Cabeçalhos para 10 anos
-        anos_headers = [''] + [f'Ano {i}' for i in range(1, 11)]
+        anos_headers = [''] + [f'Ano {i}' for i in range(1, max_anos + 1)]
         consumo_data.append(anos_headers)
 
         # Meta %
-        meta_row = ['Meta %'] + ['100%'] * 10
+        meta_row = ['Meta %'] + ['100%'] * max_anos
         consumo_data.append(meta_row)
 
-        # Target - P307232231(conceito)
-        target_row = ['Target - P307232231(conceito)']
-        for ano in range(1, 11):
-            valor_target = target_unificado.get(f'ano_{ano}', 0)
-            target_row.append(formatar_moeda(valor_target))
-        consumo_data.append(target_row)
+        # Totais unificados (vão acumulando todas as modalidades)
+        total_target = {f'ano_{i}': 0 for i in range(1, max_anos + 1)}
+        total_consumido = {f'ano_{i}': 0 for i in range(1, max_anos + 1)}
 
-        # Target Unificado
+        # 🔹 Loop em todas as modalidades do SAP
+        for modalidade, contratos in modalidades_dict.items():
+            for contrato in contratos:
+                target_row = [f"Target - {contrato.get('Nº INTERNO', '')}({modalidade})"]
+
+                for ano in range(1, max_anos + 1):
+                    valor_target = pd.to_numeric(contrato.get(f'CONSUMO ANO {ano}'), errors='coerce') or 0
+                    valor_consumo = valor_consumido.get(f'ano_{ano}', 0)
+
+                    target_row.append(formatar_moeda(valor_target))
+
+                    total_target[f'ano_{ano}'] += valor_target
+                    total_consumido[f'ano_{ano}'] += valor_consumo
+
+                consumo_data.append(target_row)
+
+        # 🔹 Linha Target Unificado
         target_unif_row = ['Target Unificado']
-        for ano in range(1, 11):
-            valor_target = target_unificado.get(f'ano_{ano}', 0)
-            target_unif_row.append(formatar_moeda(valor_target))
+        for ano in range(1, max_anos + 1):
+            target_unif_row.append(formatar_moeda(total_target[f'ano_{ano}']))
         consumo_data.append(target_unif_row)
 
-        # Valor Consumido - Unificado
         valor_consumido_row = ['Valor Consumido - Unificado']
-        for ano in range(1, 11):
-            valor_consumido_ano = valor_consumido.get(f'ano_{ano}', 0)
-            valor_consumido_row.append(formatar_moeda(valor_consumido_ano))
+        for ano in range(1, max_anos + 1):
+            valor_consumido_row.append(formatar_moeda(total_consumido[f'ano_{ano}']))
         consumo_data.append(valor_consumido_row)
 
-        # Percentual de Atingimento
+        # 🔹 Linha Percentual de Atingimento
         percentual_row = ['Percentual de Atingimento']
-        for ano in range(1, 11):
-            target_num = target_unificado.get(f'ano_{ano}', 0)
-            consumido_num = valor_consumido.get(f'ano_{ano}', 0)
-            if target_num > 0 and consumido_num > 0:
-                percentual = (consumido_num / target_num) * 100
-                percentual_row.append(f'{percentual:.2f}%')
+        percentuais = {}  # salva como número
+        for ano in range(1, max_anos + 1):
+            t = total_target[f'ano_{ano}']
+            c_val = total_consumido[f'ano_{ano}']
+            if t > 0 and c_val > 0:
+                perc = (c_val / t) * 100
+                percentuais[f'ano_{ano}'] = perc  # salva como número
+                percentual_row.append(f'{perc:.2f}%')
             else:
+                percentuais[f'ano_{ano}'] = 0
                 percentual_row.append('0.00%')
+
         consumo_data.append(percentual_row)
 
-        # Ajustar largura das colunas para 10 anos + rótulo
-        col_width = (width - 200) / 11  # 1 label + 10 anos
-        col_widths = [150] + [col_width] * 10
+        # Ajustar largura das colunas (1 label + 10 anos)
+        col_width = (width - 180) / (1 + max_anos)
+        col_widths = [150] + [col_width] * max_anos
 
         tabela_consumo = Table(consumo_data, colWidths=col_widths)
         tabela_consumo.setStyle(StyleConsumoUnificado)
@@ -853,34 +860,118 @@ def processar_arquivos():
             c.showPage()
             y_position = height - 50
 
-        tabela_consumo.drawOn(c, 50, y_position - altura_tabela_consumo)
+        tabela_consumo.drawOn(c, 10, y_position - altura_tabela_consumo)
         y_position -= altura_tabela_consumo + 30
-
         # ============================================================================
-        # SEÇÃO 20: PRODUTOS CONSUMIDOS COBRANÇA ANUAL
+        # SEÇÃO 20: EQUIPAMENTOS DO CLIENTE
         # ============================================================================
-        if y_position < 400:
-            c.showPage()
+        c.showPage()
+        if y_position < 300:
             y_position = height - 50
+
+        # Verificar se há equipamentos para este cliente
+        if not EquipamentosGeraisFiltrado.empty:
+            # Preparar dados dos equipamentos
+            equipamentos_data = [['Equipamentos Vinculados ao Cliente']]
+            equipamentos_data.append(['Equipamento', 'Descrição', 'Nº Interno', 'Série'])
+            
+            # Adicionar dados dos equipamentos
+            for _, equip in EquipamentosGeraisFiltrado.iterrows():
+                equipamentos_data.append([
+                    str(equip.get('EQUIPAMENTO', '')),
+                    str(equip.get('DESCRIÇÃO EQUIPAMENTO', '')),
+                    str(equip.get('Nº INTERNO', '')),
+                    str(equip.get('SÉRIE', ''))
+                ])
+            
+            # Criar tabela de equipamentos
+            tabela_equipamentos = Table(equipamentos_data, colWidths=[100, 200, 100, 100])
+            tabela_equipamentos.setStyle(StyleEquipamentos)
+            
+            altura_tabela_equipamentos = tabela_equipamentos.wrap(width, height)[1]
+            if y_position - altura_tabela_equipamentos < 50:
+
+                y_position = height - 50
+            
+            tabela_equipamentos.drawOn(c, 10, y_position - altura_tabela_equipamentos)
+            y_position -= altura_tabela_equipamentos + 30
+        
+        # ============================================================================
+        # SEÇÃO 21: COLIGADOS DO CLIENTE (APENAS SE EXISTIREM)
+        # ============================================================================
+        c.showPage()
+        
+
+        # Verificar se há coligados para este cliente
+        if not ColigadosFiltrado.empty:
+            # Preparar dados dos coligados
+            coligados_data = [['Coligados Vinculados ao Cliente']]
+            coligados_data.append(['Código SAP', 'Razão Social', 'SAP Principal'])
+            
+            # Adicionar dados dos coligados
+            for _, coligado in ColigadosFiltrado.iterrows():
+                coligados_data.append([
+                    str(coligado.get('CÓDIGO SAP', '')),
+                    str(coligado.get('RAZÃO SOCIAL', '')),
+                    str(coligado.get('SAP PRINCIPAL', ''))
+                ])
+            
+            # Criar tabela de coligados
+            tabela_coligados = Table(coligados_data, colWidths=[100, 300, 100])
+            tabela_coligados.setStyle(StyleColigados)
+            
+            altura_tabela_coligados = tabela_coligados.wrap(width, height)[1]
+            if y_position - altura_tabela_coligados < 50:
+                c.showPage()
+                y_position = height - 50
+            
+            tabela_coligados.drawOn(c, 10, y_position - altura_tabela_coligados)
+            y_position -= altura_tabela_coligados + 30
+        c.showPage()
+        # ============================================================================
+        # SEÇÃO 22: PRODUTOS CONSUMIDOS COBRANÇA ANUAL
+        # ============================================================================
+        
         
         # Calcular valores para o ano atual
-        ano_atual_num = min(ano_atual, 5)  # Limitar a 5 anos como na foto
+        ano_atual_num = min(ano_atual, max_anos)  
         valor_total_ano_atual = valor_consumido.get(f'ano_{ano_atual_num}', 0)
         target_ano_atual = target_unificado.get(f'ano_{ano_atual_num}', 0)
+        percentual_atual = percentuais.get(f'ano_{ano_atual_num}', 0)
         
         diferenca = valor_total_ano_atual - target_ano_atual
-        multa = abs(diferenca) * 0.1 if diferenca < 0 else 0
+        # Calcular multa
+        multa = 0
+        if percentual_atual < 100:  # só aplica se não bateu 100%
+            if 91 < percentual_atual <= 99:
+                multa = target_ano_atual * 0.06
+            elif 81 < percentual_atual <= 90:
+                multa = target_ano_atual * 0.14
+            elif 71 < percentual_atual <= 80:
+                multa = target_ano_atual * 0.21
+            elif 61 < percentual_atual <= 70:
+                multa = target_ano_atual * 0.28
+            elif 51 < percentual_atual <= 60:
+                multa = target_ano_atual * 0.34
+            elif 41 < percentual_atual <= 50:
+                multa = target_ano_atual * 0.40
+            elif 31 < percentual_atual <= 40:
+                multa = target_ano_atual * 0.45
+            elif 21 < percentual_atual <= 30:
+                multa = target_ano_atual * 0.48
+            elif 0 <= percentual_atual <= 20:
+                multa = target_ano_atual * 0.50
         
-        produtos_data = [['Produtos Consumidos Cobrança Anual']]
-        produtos_data.append(['LENTES', 'DESCRIÇÃO', 'CONSUMO', 'VALOR TOTAL', 'TARGET UNIFICADO', 'DIFERENÇA', 'CÁLCULO DE MULTA'])
-        
+        produtos_data = [['Produtos Consumidos',' Consumo realizado até o Fechamento','Cobrança Anual']]
+        produtos_data.append(['LENTES', 'DESCRIÇÃO', 'VALOR TOTAL', 'TARGET UNIFICADO', 'DIFERENÇA', 'CÁLCULO DE MULTA'])
+
         # Buscar valores específicos por SKU para o ano atual
         inicio_periodo_atual = DataDaApuração + relativedelta(months=(ano_atual_num-1)*12)
         fim_periodo_atual = DataDaApuração + relativedelta(months=ano_atual_num*12-1)
-        
+
         for i, sku in enumerate(skus):
             descricao = descricoes[i] if i < len(descricoes) else ""
-            
+
             # Buscar consumo específico do SKU
             historico_sku = BaseHistorica[
                 (
@@ -891,47 +982,98 @@ def processar_arquivos():
                 (BaseHistorica['DataApuração'] >= inicio_periodo_atual.strftime('%Y-%m')) &
                 (BaseHistorica['DataApuração'] <= fim_periodo_atual.strftime('%Y-%m'))
             ]
-            
-            consumo_sku = historico_sku['Quantidade'].sum() if not historico_sku.empty else 0
+
             valor_sku = historico_sku['Total Gross'].sum() if not historico_sku.empty else 0
+
+            # Para a primeira linha de produto, adicionar os valores centralizados
+            if i == 0:
+                produtos_data.append([
+                    sku,
+                    descricao,
+                    formatar_moeda(valor_sku),
+                    formatar_moeda(target_ano_atual),  # TARGET na primeira linha
+                    formatar_moeda(diferenca),         # DIFERENÇA na primeira linha
+                    formatar_moeda(multa)              # MULTA na primeira linha
+                ])
+            else:
+                # Para as demais linhas, deixar as últimas 3 colunas vazias (serão mescladas)
+                produtos_data.append([
+                    sku,
+                    descricao,
+                    formatar_moeda(valor_sku),
+                    "",  # Vazio para mesclar
+                    "",  # Vazio para mesclar
+                    ""   # Vazio para mesclar
+                ])
+
+        # Ajuste colWidths: removendo a coluna "CONSUMO"
+        styleConsumo = TableStyle([
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+            ('TOPPADDING', (0, 0), (-1, -1), 1),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
             
-            produtos_data.append([
-                sku, 
-                descricao, 
-                str(int(consumo_sku)) if consumo_sku > 0 else "0",
-                formatar_moeda(valor_sku),
-                "", "", ""  # Valores específicos por produto podem ser calculados se necessário
-            ])
-        
-        # Linha de totais
-        produtos_data.append([
-            '', '', '', 
-            formatar_moeda(valor_total_ano_atual), 
-            formatar_moeda(target_ano_atual), 
-            formatar_moeda(diferenca), 
-            formatar_moeda(multa)
+            # Mescla as colunas 0 e 1 na primeira linha
+            ('SPAN', (0, 0), (1, 0)),
+            
+            # Mescla as colunas 2, 3, 4 e 5 na primeira linha
+            ('SPAN', (2, 0), (5, 0)),
+            
+            # IMPORTANTE: Mesclar as colunas TARGET, DIFERENÇA e MULTA verticalmente
+            # da linha 2 (primeira linha de produtos) até a última linha
+            ('SPAN', (3, 2), (3, -1)),  # TARGET UNIFICADO mesclado verticalmente
+            ('SPAN', (4, 2), (4, -1)),  # DIFERENÇA mesclada verticalmente
+            ('SPAN', (5, 2), (5, -1)),  # CÁLCULO DE MULTA mesclado verticalmente
+            
+            # Formatação da primeira linha (cabeçalho principal)
+            ('BACKGROUND', (0, 0), (1, 0), (68/255, 83/255, 106/255)),  # Produtos Consumidos
+            ('BACKGROUND', (2, 0), (5, 0), (132/255, 150/255, 175/255)),  # Cobrança Anual
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTSIZE', (0, 0), (-1, 0), 6),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            
+            # Formatação da segunda linha (sub-cabeçalhos)
+            ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 1), (-1, 1), 5),
+            
+            # Aumentar fonte das colunas mescladas (valores centralizados)
+            ('FONTSIZE', (3, 2), (3, -1), 9),  # TARGET
+            ('FONTSIZE', (4, 2), (4, -1), 9),  # DIFERENÇA  
+            ('FONTSIZE', (5, 2), (5, -1), 9),  # MULTA
+            ('FONTNAME', (3, 2), (5, -1), 'Helvetica-Bold'),
+            
+            # Cores especiais para diferença e multa
+            ('TEXTCOLOR', (4, 2), (4, -1), colors.red if diferenca < 0 else colors.green),
+            ('TEXTCOLOR', (5, 2), (5, -1), colors.red),
+            
+            # Bordas
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
         ])
-        
         tabela_produtos = Table(produtos_data, colWidths=[50, 100, 80, 120, 120, 120])
         tabela_produtos.setStyle(styleConsumo)
-        
+
         altura_tabela_produtos = tabela_produtos.wrap(width, height)[1]
         if y_position - altura_tabela_produtos < 50:
             c.showPage()
             y_position = height - 50
-        
-        tabela_produtos.drawOn(c, 50, y_position - altura_tabela_produtos)
+
+        tabela_produtos.drawOn(c, 10, y_position - altura_tabela_produtos)
         y_position -= altura_tabela_produtos + 30
 
         # ============================================================================
-        # SEÇÃO 22: EXTRATO DE CONSUMO - VISÃO GERAL
+        # SEÇÃO 23: EXTRATO DE CONSUMO - VISÃO GERAL
         # ============================================================================
         if y_position < 300:
             c.showPage()
             y_position = height - 50
 
-        # Cabeçalho fixo da tabela
-        cabecalho = ['SAP Principal', 'Razão Social', 'SKU', 'Quantidade', 'Valor', 'Mês', 'Ano']
+     
 
         # Buscar dados do histórico
         historico_extrato = BaseHistorica[
@@ -947,6 +1089,7 @@ def processar_arquivos():
             ['Codigo_PN', 'Nome_PN', 'Item 2', 'Mês', 'Ano'],
             as_index=False
         ).agg({
+            'Descricao_Item': 'first',
             'Quantidade': 'sum',
             'Total Gross': 'sum'
         })
@@ -959,7 +1102,7 @@ def processar_arquivos():
         for _, registro in historico_agrupado.iterrows():
             quantidade = int(registro.get('Quantidade', 0)) if pd.notna(registro.get('Quantidade', 0)) else 0
             valor_total = formatar_moeda(registro.get('Total Gross', 0))
-            razao_social = registro['Nome_PN'][:25] + "..." if len(str(registro['Nome_PN'])) > 25 else str(registro['Nome_PN'])
+            razao_social = str(registro['Nome_PN'])
 
             extrato_dados.append([
                 str(registro['Codigo_PN']),
@@ -975,28 +1118,37 @@ def processar_arquivos():
         # DESENHAR A TABELA EM PARTES (para caber nas páginas)
         # =====================================================================
         if extrato_dados:  # Se há dados
+            
+            # Cabeçalho fixo da tabela
+            cabecalho = ['SAP Principal', 'Razão Social', 'SKU', 'Quantidade', 'Valor', 'Mês', 'Ano']
+            linha_titulo = ['Extrato de Consumo - Visão Geral'] + [''] * (len(cabecalho) - 1)
+            max_linhas_por_pagina = 100  # ajusta conforme necessário
 
-            max_linhas_por_pagina = 40  # ajusta conforme necessário
+            
             for i in range(0, len(extrato_dados), max_linhas_por_pagina):
-                bloco = extrato_dados[i:i+max_linhas_por_pagina]
+                bloco = extrato_dados[i:i + max_linhas_por_pagina]
 
-                # Recoloca o cabeçalho no topo de cada página
-                bloco_com_header = [cabecalho] + bloco  
+                # 2. JUNTE AS TRÊS PARTES: TÍTULO, CABEÇALHO DE COLUNAS E DADOS
+                dados_completos = [linha_titulo, cabecalho] + bloco
 
-                tabela_extrato = Table(bloco_com_header, colWidths=[70, 120, 60, 50, 70, 30, 40])
+                # 3. CRIE A TABELA USANDO A NOVA ESTRUTURA DE DADOS
+                tabela_extrato = Table(dados_completos, colWidths=[50, 260, 40, 50, 100, 50, 40])
+                
+                # Aplique seu estilo, que agora funcionará perfeitamente
                 tabela_extrato.setStyle(StyleBaseHistorica)
 
+                # ... o resto do seu código para desenhar a tabela ...
                 altura_tabela_extrato = tabela_extrato.wrap(width, height)[1]
 
                 if y_position - altura_tabela_extrato < 50:
                     c.showPage()
                     y_position = height - 50
 
-                tabela_extrato.drawOn(c, 50, y_position - altura_tabela_extrato)
+                tabela_extrato.drawOn(c, 10, y_position - altura_tabela_extrato)
                 y_position -= altura_tabela_extrato + 30
 
         # ============================================================================
-        # SEÇÃO 23: FINALIZAR PDF E UPLOAD
+        # SEÇÃO 24: FINALIZAR PDF E UPLOAD
         # ============================================================================
         c.save()
         print(f"PDF gerado: {nome_arquivo}")
