@@ -379,7 +379,7 @@ def processar_arquivos():
                 ('BACKGROUND', (0, 0), (-1, 0), (68/255, 83/255, 106/255)),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('FONTSIZE', (0, 0), (-1, 0), 5),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 
                 # Sub-cabeçalho
@@ -792,22 +792,36 @@ def processar_arquivos():
         # ============================================================================
         # Logo da J&J (simulado)
         def resource_path(relative_path):
-                """Retorna o caminho absoluto para o recurso, funcionando com PyInstaller"""
-                if hasattr(sys, '_MEIPASS'):
-                    return os.path.join(sys._MEIPASS, relative_path)
-                return os.path.join(os.path.abspath("."), relative_path)
+            """Retorna o caminho absoluto para o recurso, funcionando com PyInstaller"""
+            if hasattr(sys, '_MEIPASS'):
+                return os.path.join(sys._MEIPASS, relative_path)
+            return os.path.join(os.path.abspath("."), relative_path)
 
-        # Agora você usa assim:
         caminho_imagem = resource_path("images/logo.png")
-        c.drawImage(caminho_imagem, 10, 370, width=20, height=20)
-        
-        # Título do relatório
+
+        # Coordenadas do cabeçalho
+        y_header = height - 60   # altura de referência para título
+        logo_height = 20         # menor que antes
+        logo_width = 20
+
+        # Desenhar logo à esquerda (um pouco mais pra cima)
+        c.drawImage(
+            caminho_imagem,
+            40,                   # X fixo à esquerda
+            y_header - (logo_height/2) + 10,  # +10 deixa mais pra cima
+            width=logo_width,
+            height=logo_height,
+            mask='auto'
+        )
+
+        # Título do relatório centralizado
         c.setFillColor(colors.black)
         c.setFont("Helvetica-Bold", 16)
         titulo_relatorio = f"Relatório Apuração  - {TituloRelatorio}"
-        c.drawCentredString(width/2, height - 40, titulo_relatorio)
-        
-        y_position = height - 80
+        c.drawCentredString(width/2, y_header, titulo_relatorio)
+
+        # Atualiza posição Y para o conteúdo abaixo
+        y_position = y_header - 40
 
         # ============================================================================
         # SEÇÃO 17: LAYOUT CORRIGIDO - CLIENTE AO LADO DO CONTRATO
@@ -956,7 +970,7 @@ def processar_arquivos():
                         if i > max_anos:
                             max_anos = i
 
-        if y_position < 300:
+        if y_position <80:
             c.showPage()
             y_position = height - 50
 
@@ -1065,9 +1079,7 @@ def processar_arquivos():
         # SEÇÃO 20: EQUIPAMENTOS DO CLIENTE
         # ============================================================================
         c.showPage()
-        if y_position < 300:
-            y_position = height - 50
-
+    
         # Verificar se há equipamentos para este cliente
         if not EquipamentosGeraisFiltrado.empty:
             # Preparar dados dos equipamentos
@@ -1283,6 +1295,84 @@ def processar_arquivos():
         tabela_produtos.drawOn(c, 10, y_position - altura_tabela_produtos)
         y_position -= altura_tabela_produtos + 30
 
+    
+        # ============================================================================
+        # # SEÇÃO 23: EXTRATO DE CONSUMO - VISÃO GERAL
+        # ============================================================================
+        if y_position < 300:
+            c.showPage()
+            y_position = height - 50
+
+        
+        # Buscar dados do histórico
+        historico_extrato = BaseHistorica[
+            (
+                (BaseHistorica['Codigo_PN'] == sap_cliente) |
+                (BaseHistorica['Codigo_PN'].isin(ColigadosFiltrado['CÓDIGO SAP']))
+            ) &
+            (BaseHistorica['Item 2'].isin(lentesFiltroHistorico))
+        ].copy()
+
+        # Agregar por Codigo_PN, RAZÃO SOCIAL, Item 2, Mês e Ano somando Quantidade e Total Gross
+        historico_agrupado = historico_extrato.groupby(
+            ['Codigo_PN', 'Nome_PN', 'Item 2', 'Mês', 'Ano'],
+            as_index=False
+        ).agg({
+            'Descricao_Item': 'first',
+            'Quantidade': 'sum',
+            'Total Gross': 'sum'
+        })
+
+        # Ordenar por ano e mês (mais recente primeiro)
+        historico_agrupado = historico_agrupado.sort_values(['Ano', 'Mês'], ascending=[False, False])
+
+        # Montar lista de dados para tabela
+        extrato_dados = []
+        for _, registro in historico_agrupado.iterrows():
+            quantidade = int(registro.get('Quantidade', 0)) if pd.notna(registro.get('Quantidade', 0)) else 0
+            valor_total = formatar_moeda(registro.get('Total Gross', 0))
+            razao_social = str(registro['Nome_PN'])
+
+            extrato_dados.append([
+                str(registro['Codigo_PN']),
+                razao_social,
+                str(registro['Item 2']),
+                str(quantidade),
+                valor_total,
+                str(registro['Mês']),
+                str(registro['Ano'])
+            ])
+
+        # =====================================================================
+        # DESENHAR TABELA EM UMA ÚNICA PÁGINA (com altura dinâmica)
+        # =====================================================================
+        if extrato_dados:
+
+            # Cabeçalho fixo da tabela
+            cabecalho = ['SAP Principal', 'Razão Social', 'SKU', 'Quantidade', 'Valor', 'Mês', 'Ano']
+            linha_titulo = ['Extrato de Consumo - Visão Geral'] + [''] * (len(cabecalho) - 1)
+            max_linhas_por_pagina = 100  # ajusta conforme necessário
+
+            for i in range(0, len(extrato_dados), max_linhas_por_pagina):
+                bloco = extrato_dados[i:i + max_linhas_por_pagina]
+                # 2. JUNTE AS TRÊS PARTES: TÍTULO, CABEÇALHO DE COLUNAS E DADOS
+                dados_completos = [linha_titulo, cabecalho] + bloco
+                # 3. CRIE A TABELA USANDO A NOVA ESTRUTURA DE DADOS
+                tabela_extrato = Table(dados_completos, colWidths=[50, 260, 40, 50, 100, 50, 40])
+                
+                # Aplique seu estilo, que agora funcionará perfeitamente
+                tabela_extrato.setStyle(StyleBaseHistorica)
+
+                # ... o resto do seu código para desenhar a tabela ...
+                altura_tabela_extrato = tabela_extrato.wrap(width, height)[1]
+
+                if y_position - altura_tabela_extrato < 50:
+                    c.showPage()
+                    y_position = height - 50
+
+                tabela_extrato.drawOn(c, 10, y_position - altura_tabela_extrato)
+                y_position -= altura_tabela_extrato + 30
+                    
 
         # ============================================================================
         # SEÇÃO 24: FINALIZAR PDF E UPLOAD
